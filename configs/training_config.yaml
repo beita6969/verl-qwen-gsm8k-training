@@ -1,0 +1,77 @@
+# Qwen2.5-1.5B PPO Training Configuration
+# GSM8K Math Reasoning Dataset
+
+# Model Configuration
+model:
+  name: "Qwen/Qwen2.5-1.5B-Instruct"
+  max_length: 1024
+  tokenizer: "Qwen/Qwen2.5-1.5B-Instruct"
+
+# Dataset Configuration
+data:
+  train_files: "/root/data/gsm8k/train.parquet"
+  val_files: "/root/data/gsm8k/test.parquet"
+  train_batch_size: 64
+  val_batch_size: 64
+  max_prompt_length: 512
+  max_response_length: 512
+  filter_overlong_prompts: true
+  num_workers: 4
+
+# PPO Training Configuration
+ppo:
+  # Actor (Policy Model)
+  actor:
+    learning_rate: 1.0e-6
+    ppo_mini_batch_size: 16
+    ppo_micro_batch_size_per_gpu: 2
+    grad_clip: 1.0
+    epochs: 4
+
+  # Critic (Value Model)
+  critic:
+    learning_rate: 1.0e-5
+    ppo_micro_batch_size_per_gpu: 2
+    grad_clip: 1.0
+
+  # Rollout Configuration
+  rollout:
+    name: "vllm"
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.4
+    max_model_len: 1024
+    log_prob_micro_batch_size_per_gpu: 2
+    temperature: 1.0
+    top_p: 1.0
+    top_k: -1
+
+# Training Configuration
+trainer:
+  # Logging
+  logger: ["console", "tensorboard"]
+  project_name: "verl_gsm8k"
+  experiment_name: "qwen2.5_1.5b_ppo"
+  log_interval: 1
+
+  # Hardware
+  n_gpus_per_node: 1
+  nnodes: 1
+
+  # Training schedule
+  total_epochs: 10
+  save_freq: 10000  # Prevent checkpoint bloat
+  test_freq: 1
+
+  # Paths
+  default_local_dir: "/root/checkpoints"
+
+  # Optimization
+  gradient_checkpointing: false
+  mixed_precision: "bf16"
+
+# Environment Configuration
+environment:
+  cuda_visible_devices: "0"
+  cuda_home: "/usr/local/cuda-12.5"
+  ld_library_path: "/usr/lib64-nvidia:/usr/local/cuda-12.5/lib64"
+  seed: 42

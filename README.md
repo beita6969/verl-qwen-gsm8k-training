@@ -71,12 +71,43 @@ nvidia-smi
 
 ```
 .
-├── fix_torch_train_no_checkpoints.sh   # Main training script (recommended)
-├── fix_torch_and_train.sh              # Alternative version with checkpoints
+├── configs/
+│   └── training_config.yaml             # Training configuration (YAML format)
+├── src/
+│   ├── data_preprocessing.py            # GSM8K dataset preprocessing
+│   └── train_ppo.py                     # Python training wrapper
+├── scripts/
+│   └── monitor_training.py              # Real-time training monitor
+├── fix_torch_train_no_checkpoints.sh    # Main training script (recommended)
+├── requirements.txt                     # Python dependencies
 ├── README.md                            # This file
-├── README_CN.md                         # Chinese documentation
-├── TRAINING_GUIDE.md                    # Detailed training guide
 └── .gitignore                           # Git ignore file
+```
+
+### Quick Deploy (Shell Script)
+
+For production deployment, use the shell script:
+
+```bash
+bash fix_torch_train_no_checkpoints.sh
+```
+
+### Python Training (Advanced)
+
+For customized training, use the Python framework:
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Preprocess GSM8K dataset
+python src/data_preprocessing.py --output-dir /root/data/gsm8k
+
+# 3. Train with Python script
+python src/train_ppo.py --config configs/training_config.yaml
+
+# 4. Monitor training (in another terminal)
+python scripts/monitor_training.py --log-file /root/training_1.5b.log
 ```
 
 ## 🔧 Key Configuration
