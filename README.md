@@ -31,25 +31,44 @@ This repository contains optimized training scripts that successfully train Qwen
 - verl-agent 0.7.0.dev0
 - vLLM 0.11.0 (requires torch==2.8.0)
 
-### Installation & Training
+### Step 1: Prepare Dataset
 
 ```bash
-# 1. Upload the training script to your server
-scp fix_torch_train_no_checkpoints.sh root@your-server:/root/
+# Method 1: One-line setup (Recommended)
+bash scripts/prepare_dataset.sh
 
-# 2. SSH into your server
-ssh root@your-server
+# Method 2: Python script
+python src/data_preprocessing.py --output-dir /root/data/gsm8k
+```
 
-# 3. Run the training script
-chmod +x /root/fix_torch_train_no_checkpoints.sh
-bash /root/fix_torch_train_no_checkpoints.sh
+This will download and preprocess GSM8K dataset:
+- Train: 7,473 samples (~3.3 MB)
+- Test: 1,319 samples (~605 KB)
+
+**See [DATA.md](DATA.md) for detailed dataset documentation.**
+
+### Step 2: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 3: Training
+
+```bash
+# Quick deploy (Shell script)
+bash fix_torch_train_no_checkpoints.sh
+
+# OR Python framework (advanced)
+python src/train_ppo.py --config configs/training_config.yaml
 ```
 
 The script will automatically:
 1. Fix torch version compatibility (downgrade to 2.8.0)
 2. Install missing dependencies
 3. Configure environment variables
-4. Start PPO training in background
+4. Prepare GSM8K dataset (if not exists)
+5. Start PPO training in background
 
 ### Monitor Training
 
@@ -77,12 +96,16 @@ nvidia-smi
 │   ├── data_preprocessing.py            # GSM8K dataset preprocessing
 │   └── train_ppo.py                     # Python training wrapper
 ├── scripts/
+│   ├── prepare_dataset.sh               # One-click dataset preparation
 │   └── monitor_training.py              # Real-time training monitor
 ├── fix_torch_train_no_checkpoints.sh    # Main training script (recommended)
 ├── requirements.txt                     # Python dependencies
+├── DATA.md                              # Dataset documentation
 ├── README.md                            # This file
 └── .gitignore                           # Git ignore file
 ```
+
+**Note**: Model weights are NOT included in the repository. The training script will automatically download `Qwen/Qwen2.5-1.5B-Instruct` from HuggingFace.
 
 ### Quick Deploy (Shell Script)
 
